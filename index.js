@@ -4,7 +4,6 @@ import { restResources } from "@shopify/shopify-api/rest/admin/2023-01";
 import * as dotenv from 'dotenv'
 import express from 'express';
 import crypto from "crypto";
-import fs from "fs";
 import Client from "ftp";
 import winston from 'winston';
 
@@ -154,15 +153,6 @@ function createCSVFromJSON(order) {
   }
 
   data = data.replace(/null/g, "");
-
-  fs.writeFile(`../order-${order.id}.csv`, data, "utf-8", (err) => {
-    if (err) logger.error(err);
-    else {
-      logger.info(`Order ${order.id} saved`);
-
-      
-    }
-  });
 
   const ftpClient = new Client();
   try {
