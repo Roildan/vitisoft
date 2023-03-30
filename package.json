@@ -1,0 +1,17 @@
+{
+  "name": "vitisoft",
+  "type": "module",
+  "author": "Arthur Moulin",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./index.js"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "@shopify/shopify-api": "^6.2.0",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "ftp": "^0.3.10",
+    "winston": "^3.8.2"
+  }
+}
