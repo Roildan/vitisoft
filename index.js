@@ -5,6 +5,7 @@ import * as dotenv from 'dotenv'
 import express from 'express';
 import crypto from "crypto";
 import Client from "ftp";
+import fs from "fs";
 import winston from 'winston';
 
 // Config
@@ -154,26 +155,41 @@ function createCSVFromJSON(order) {
 
   data = data.replace(/null/g, "");
 
-  const ftpClient = new Client();
-  try {
-    ftpClient.on("ready", function() {
-      ftpClient.put(`../order-${order.id}.csv`, `order-${order.id}.csv`, function(err) {
-        if (err) throw err;
-        ftpClient.end();
-      });
-    });
-    
-    ftpClient.connect({
-      host: process.env.FTP_HOST,
-      port: process.env.FTP_PORT,
-      user: process.env.FTP_USER,
-      password: process.env.FTP_PASSWORD
-    });
+  
+  fs.writeFile(`./order-${order.id}.csv`, data, "utf-8", (err) => {
+    if (err) logger.error(err);
+    else {
+      logger.info(`Order ${order.id} saved`);
 
-    logger.info(`Order ${order.id} FTP upload successfull`);
-  } catch(err) {
-    logger.error(err);
-  }
+      const ftpClient = new Client();
+      try {
+        ftpClient.on("ready", function() {
+          ftpClient.put(`./order-${order.id}.csv`, `order-${order.id}.csv`, function(err) {
+            if (err) throw err;
+          
+            ftpClient.end();
+            logger.info(`Order ${order.id} FTP upload successfull`);
+
+            fs.unlink(`./order-${order.id}.csv`, function (err) {            
+              if (err) throw err;
+              logger.info(`Order ${order.id} deleted`);
+            });
+          });
+        });
+        
+        ftpClient.connect({
+          host: process.env.FTP_HOST,
+          port: process.env.FTP_PORT,
+          user: process.env.FTP_USER,
+          password: process.env.FTP_PASSWORD
+        });
+      } catch(err) {
+        logger.error(err);
+      }
+    }
+  });
+      
+    
 }
 
 // Process webhooks
